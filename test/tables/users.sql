@@ -8,16 +8,23 @@ CREATE TRIGGER history
     AFTER INSERT OR UPDATE OR DELETE
     ON users
     FOR EACH ROW
-EXECUTE PROCEDURE trigger_history('history', '{id,nickname}');
+EXECUTE PROCEDURE trigger_history('history', '{ id, nickname }');
+
+
+CREATE TRIGGER history
+    AFTER INSERT OR UPDATE OR DELETE
+    ON users
+    FOR EACH ROW
+EXECUTE PROCEDURE trigger_history('history');
 
 
 
 INSERT INTO "users"("nickname")
-VALUES ('test');
+VALUES ('test8');
 
 UPDATE "users"
-SET ("id", "nickname") = ROW (0, 'test')
-WHERE "nickname" = '_test';
+SET ("id", "nickname") = ROW (0, '7test')
+WHERE "nickname" = '7test';
 
 DELETE
 FROM "users"
