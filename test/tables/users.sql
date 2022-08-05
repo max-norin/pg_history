@@ -1,15 +1,15 @@
 CREATE TABLE "users"
 (
     "id"       SERIAL PRIMARY KEY,
-    "nickname" VARCHAR(255) NOT NULL UNIQUE
+    "nickname" VARCHAR(255) NOT NULL UNIQUE,
+    "password" VARCHAR(255) NOT NULL
 );
 
 CREATE TRIGGER history
     AFTER INSERT OR UPDATE OR DELETE
     ON users
     FOR EACH ROW
-EXECUTE PROCEDURE trigger_history('history', '{ id, nickname }');
-
+EXECUTE PROCEDURE trigger_history('history', '{ id, nickname, password }', '{ password }');
 
 CREATE TRIGGER history
     AFTER INSERT OR UPDATE OR DELETE
