@@ -6,10 +6,10 @@ BEGIN
         SELECT jsonb_object_agg(key, value)
         FROM (
             SELECT "key", "value"
-            FROM jsonb_each_text("a")
+            FROM jsonb_each("a")
             EXCEPT
             SELECT "key", "value"
-            FROM jsonb_each_text("b")
+            FROM jsonb_each("b")
             ) "table" ("key", "value"));
 END;
 $$
