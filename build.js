@@ -4,9 +4,9 @@ import get_files from './get_files.js'
 
 const files = [
   ...get_files('./helpers'),
+  ...get_files('./types'),
   ...get_files('./tables'),
   ...get_files('./triggers'),
-  './init.sql',
 ]
 
 let content = ''
