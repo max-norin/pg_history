@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION history.trigger_history()
+CREATE FUNCTION trigger_history()
     RETURNS TRIGGER
 AS
 $$

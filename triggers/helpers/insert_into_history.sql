@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION insert_into_history("target_table" REGCLASS, "primary_key" JSONB, "dml" DML, "data" JSONB, "timestamp" TIMESTAMP = localtimestamp)
+CREATE FUNCTION insert_into_history("target_table" REGCLASS, "primary_key" JSONB, "dml" DML, "data" JSONB, "timestamp" TIMESTAMP = localtimestamp)
     RETURNS JSONB
 AS
 $$

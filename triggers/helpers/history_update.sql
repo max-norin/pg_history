@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION history_update("target_table" REGCLASS, "relid" OID, "old_record" JSONB, "new_record" JSONB, "columns" TEXT[] = NULL)
+CREATE FUNCTION history_update("target_table" REGCLASS, "relid" OID, "old_record" JSONB, "new_record" JSONB, "columns" TEXT[] = NULL)
     RETURNS JSONB
 AS
 $$

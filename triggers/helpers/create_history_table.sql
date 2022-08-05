@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION create_history_table("history_schema" REGNAMESPACE, "table_schema" TEXT, "table_name" TEXT)
+CREATE FUNCTION create_history_table("history_schema" REGNAMESPACE, "table_schema" TEXT, "table_name" TEXT)
     RETURNS REGCLASS
 AS
 $$

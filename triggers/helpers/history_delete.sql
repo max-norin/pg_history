@@ -1,4 +1,4 @@
-CREATE OR REPLACE FUNCTION history_delete("target_table" REGCLASS, "relid" OID, "old_record" JSONB)
+CREATE FUNCTION history_delete("target_table" REGCLASS, "relid" OID, "old_record" JSONB)
     RETURNS JSONB
 AS
 $$
