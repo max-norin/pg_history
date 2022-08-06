@@ -8,7 +8,12 @@ DECLARE
 BEGIN
     -- https://postgresql.org/docs/current/catalog-pg-class.html
     IF NOT EXISTS(SELECT "relname" FROM pg_class c WHERE c."relnamespace" = "history_schema" AND c."relname" = "target_table_name") THEN
-        EXECUTE format('CREATE TABLE %s() INHERITS ("history");', "target_table");
+        EXECUTE format('CREATE TABLE %1s() INHERITS ("history");
+                        CREATE RULE "%2s__update" AS ON UPDATE TO %3s DO INSTEAD NOTHING;
+                        CREATE RULE "%4s__delete" AS ON DELETE TO %5s DO INSTEAD NOTHING;',
+                       "target_table",
+                       "target_table_name", "target_table",
+                       "target_table_name", "target_table");
     END IF;
 
     RETURN "target_table"::REGCLASS;

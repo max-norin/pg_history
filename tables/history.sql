@@ -8,4 +8,8 @@ CREATE TABLE "history"
     "timestamp"   TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
-COMMENT ON TABLE "history" IS '';
+COMMENT ON TABLE "history" IS 'history table parent';
+
+CREATE RULE "history__insert" AS ON INSERT TO "history"
+    DO INSTEAD
+    NOTHING;
