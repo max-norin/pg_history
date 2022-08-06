@@ -58,7 +58,7 @@ EXECUTE PROCEDURE trigger_history('history', get_columns('users'::REGCLASS) - AR
 
 Функция `trigger_history("history_schema" TEXT[, "columns" TEXT[] = NULL][, "hidden_columns" TEXT = NULL])`, где:
 
-- `"history_schema"` схема, где будет создана таблица для хранения истории изменений, наследованная от таблицы "history";
+- `"history_schema"` схема, где будет создана таблица для хранения истории изменений, наследованная от таблицы `"history"`;
 - `"columns"` массив колонок, которые будут записаны при обновлении;
 - `"hidden_columns"` массив колонок, значение которых хранить нельзя.
 
