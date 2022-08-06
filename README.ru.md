@@ -38,32 +38,29 @@ CREATE EXTENSION "pg_history"
 
 ```postgresql
 CREATE TRIGGER history
-    AFTER INSERT OR UPDATE OR DELETE
-    ON users
-    FOR EACH ROW
-EXECUTE PROCEDURE trigger_history('history', '{ id, nickname, password }', '{ password }');
--- ИЛИ
-CREATE TRIGGER history
-    AFTER INSERT OR UPDATE OR DELETE
-    ON users
-    FOR EACH ROW
+  AFTER INSERT OR UPDATE OR DELETE
+  ON users
+  FOR EACH ROW
 EXECUTE PROCEDURE trigger_history('history');
 -- ИЛИ
-SELECT (get_columns('users'::REGCLASS) - ARRAY ['id', 'created_at', 'updated_at']::TEXT[]) AS "columns";
 CREATE TRIGGER history
-    AFTER INSERT OR UPDATE OR DELETE
-    ON users
-    FOR EACH ROW
-EXECUTE PROCEDURE trigger_history('history', <вставить из select>);
+  AFTER INSERT OR UPDATE OR DELETE
+  ON users
+  FOR EACH ROW
+EXECUTE PROCEDURE trigger_history('history', '{ password }');
+-- ИЛИ
+CREATE TRIGGER history
+  AFTER INSERT OR UPDATE OR DELETE
+  ON users
+  FOR EACH ROW
+EXECUTE PROCEDURE trigger_history('history', '{ password }', '{ created_at, updated_at }');
 ```
 
-Функция `trigger_history("history_schema" TEXT[, "columns" TEXT[] = NULL][, "hidden_columns" TEXT = NULL])`, где:
+Функция `trigger_history("history_schema" TEXT[, "hidden_columns" TEXT[] = NULL][, "hidden_columns" TEXT = NULL])`, где:
 
 - `"history_schema"` схема, где будет создана таблица для хранения истории изменений, наследованная от таблицы `"history"`;
-- `"columns"` массив колонок, которые будут записаны при обновлении;
-- `"hidden_columns"` массив колонок, значение которых хранить нельзя.
-
-Функция `get_columns("relid" OID)` возвращает массив колонок таблицы `"relid"`.
+- `"hidden_columns"` массив колонок, значение которых хранить нельзя;
+- `"unsaved_columns"` массив колонок, которых хранить нельзя.
 
 ## Файлы
 

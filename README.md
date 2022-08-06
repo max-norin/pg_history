@@ -40,32 +40,30 @@ To store data changes, you need to add a `trigger_history()` trigger from the ex
 
 ```postgresql
 CREATE TRIGGER history
-    AFTER INSERT OR UPDATE OR DELETE
-    ON users
-    FOR EACH ROW
-EXECUTE PROCEDURE trigger_history('history', '{ id, nickname, password }', '{ password }');
--- OR
-CREATE TRIGGER history
-    AFTER INSERT OR UPDATE OR DELETE
-    ON users
-    FOR EACH ROW
+  AFTER INSERT OR UPDATE OR DELETE
+  ON users
+  FOR EACH ROW
 EXECUTE PROCEDURE trigger_history('history');
 -- OR
-SELECT (get_columns('users'::REGCLASS) - ARRAY ['id', 'created_at', 'updated_at']::TEXT[]) AS "columns";
 CREATE TRIGGER history
     AFTER INSERT OR UPDATE OR DELETE
     ON users
     FOR EACH ROW
-EXECUTE PROCEDURE trigger_history('history', <paste from select>);
+EXECUTE PROCEDURE trigger_history('history', '{ password }');
+-- OR
+CREATE TRIGGER history
+  AFTER INSERT OR UPDATE OR DELETE
+  ON users
+  FOR EACH ROW
+EXECUTE PROCEDURE trigger_history('history', '{ password }', '{ created_at, updated_at }');
 ```
 
-Function `trigger_history("history_schema" TEXT[, "columns" TEXT[] = NULL][, "hidden_columns" TEXT = NULL])`, where:
+Function `trigger_history("history_schema" TEXT[, "hidden_columns" TEXT[] = NULL][, "unsaved_columns" TEXT = NULL])`, where:
 
 - `"history_schema"` a schema where a table will be created to store the history of changes, inherited from the `"history"` table;
-- `"columns"` array of columns to be written on update;
-    - `"hidden_columns"` array of columns whose values cannot be saved.
+- `"hidden_columns"` array of columns that values cannot be saved;
+- `"unsaved_columns"` array of columns that cannot be saved.
 
-Function `get_columns("relid" OID)` return array of columns `"relid"` table.
 
 ## Files
 

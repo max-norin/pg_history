@@ -31,29 +31,6 @@ CREATE OPERATOR - (
 COMMENT ON OPERATOR - (ANYARRAY, ANYARRAY) IS '$1 EXCEPT $2';
 
 /*
-=================== GET_COLUMNS =================== 
-*/
-CREATE FUNCTION get_columns ("relid" OID, "has_generated_column" BOOLEAN = TRUE, "rel" TEXT = '')
-    RETURNS TEXT[]
-    AS $$
-BEGIN
-    -- https://postgresql.org/docs/current/catalog-pg-attribute.html
-    RETURN (
-        SELECT array_agg(CASE WHEN length("rel") > 0 THEN format('%s.%I', "rel", a."attname") ELSE a."attname" END)
-        FROM "pg_attribute" AS a
-        WHERE "attrelid" = "relid"
-            AND a."attnum" > 0
-            AND ("has_generated_column" OR a.attgenerated = '')
-            AND NOT a.attisdropped);
-END
-$$
-LANGUAGE plpgsql
-STABLE
-RETURNS NULL ON NULL INPUT;
-
-COMMENT ON FUNCTION get_columns (OID, BOOLEAN, TEXT) IS 'get table columns';
-
-/*
 =================== GET_PRIMARY_KEY =================== 
 */
 CREATE FUNCTION get_primary_key ("relid" OID)
@@ -231,7 +208,7 @@ $$
 /*
 =================== HISTORY_UPDATE =================== 
 */
-CREATE FUNCTION history_update("target_table" REGCLASS, "relid" OID, "old_record" JSONB, "new_record" JSONB, "columns" TEXT[] = NULL, "hidden_columns" TEXT[] = NULL)
+CREATE FUNCTION history_update("target_table" REGCLASS, "relid" OID, "old_record" JSONB, "new_record" JSONB, "hidden_columns" TEXT[] = NULL)
     RETURNS JSONB
 AS
 $$
@@ -239,8 +216,7 @@ DECLARE
     "pk_columns"             CONSTANT TEXT[] NOT NULL = get_primary_key("relid");
     "primary_key"            CONSTANT JSONB NOT NULL  = "old_record" -> "pk_columns";
     "chanced_record"         CONSTANT JSONB           = "new_record" - "old_record";
-    "save_chanced_record"    CONSTANT JSONB           = CASE WHEN ("columns" IS NOT NULL) THEN "chanced_record" -> "columns" ELSE "chanced_record" END;
-    "history_chanced_record" CONSTANT JSONB           = "save_chanced_record" -/ "hidden_columns";
+    "history_chanced_record" CONSTANT JSONB           = "chanced_record" -/ "hidden_columns";
 BEGIN
     IF "history_chanced_record" IS NOT NULL AND "history_chanced_record" != '{}' THEN
         RETURN insert_into_history("target_table", "primary_key", 'UPDATE'::DML, "history_chanced_record");
@@ -282,15 +258,15 @@ CREATE FUNCTION trigger_history()
 AS
 $$
 DECLARE
-    "target_table"   CONSTANT REGCLASS NOT NULL = create_history_table(TG_ARGV[0]::REGNAMESPACE, TG_TABLE_SCHEMA, TG_TABLE_NAME);
-    "columns"        CONSTANT TEXT[]            = TG_ARGV[1];
-    "hidden_columns" CONSTANT TEXT[]            = TG_ARGV[2];
+    "target_table"    CONSTANT REGCLASS NOT NULL = create_history_table(TG_ARGV[0]::REGNAMESPACE, TG_TABLE_SCHEMA, TG_TABLE_NAME);
+    "hidden_columns"  CONSTANT TEXT[]            = TG_ARGV[1];
+    "unsaved_columns" CONSTANT TEXT[]            = TG_ARGV[2];
 BEGIN
     IF TG_OP = 'INSERT' THEN
-        PERFORM insert_into_history("target_table", NULL::JSONB, 'INSERT'::DML, to_jsonb(NEW) -/ "hidden_columns");
+        PERFORM insert_into_history("target_table", NULL::JSONB, 'INSERT'::DML, (to_jsonb(NEW) - "unsaved_columns") -/ "hidden_columns");
         RETURN NEW;
     ELSIF TG_OP = 'UPDATE' THEN
-        PERFORM history_update("target_table", TG_RELID, to_jsonb(OLD), to_jsonb(NEW), "columns", "hidden_columns");
+        PERFORM history_update("target_table", TG_RELID, to_jsonb(OLD) - "unsaved_columns", to_jsonb(NEW) - "unsaved_columns", "hidden_columns");
         RETURN NEW;
     ELSIF TG_OP = 'DELETE' THEN
         PERFORM history_delete("target_table", TG_RELID, to_jsonb(OLD));
