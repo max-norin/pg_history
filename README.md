@@ -51,11 +51,12 @@ CREATE TRIGGER history
     FOR EACH ROW
 EXECUTE PROCEDURE trigger_history('history');
 -- OR
+SELECT (get_columns('users'::REGCLASS) - ARRAY ['id', 'created_at', 'updated_at']::TEXT[]) AS "columns";
 CREATE TRIGGER history
     AFTER INSERT OR UPDATE OR DELETE
     ON users
     FOR EACH ROW
-EXECUTE PROCEDURE trigger_history('history', get_columns('users'::REGCLASS) - ARRAY ['id', 'created_at', 'updated_at']::TEXT[]);
+EXECUTE PROCEDURE trigger_history('history', <paste from select>);
 ```
 
 Function `trigger_history("history_schema" TEXT[, "columns" TEXT[] = NULL][, "hidden_columns" TEXT = NULL])`, where:
