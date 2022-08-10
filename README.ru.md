@@ -23,6 +23,8 @@ CREATE EXTENSION "pg_history"
     VERSION '1.0';
 ```
 
+[Подробнее про расширение и файл control](https://postgrespro.ru/docs/postgresql/14/extend-extensions)
+
 ### Пример таблицы `history."public.users__2022_08"`
 
 | \# | primary_key | dml    | data                                             | timestamp                  |

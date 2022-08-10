@@ -25,6 +25,8 @@ CREATE EXTENSION "pg_history"
     VERSION '1.0';
 ```
 
+[More about the extension and the control file](https://www.postgresql.org/docs/current/extend-extensions.html)
+
 ### Example table `history."public.users__2022_08"`
 
 | \# | primary_key | dml    | data                                             | timestamp                  |
