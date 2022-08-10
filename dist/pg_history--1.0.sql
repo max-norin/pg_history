@@ -90,7 +90,7 @@ CREATE FUNCTION jsonb_object_fields ("value" JSONB, "paths" TEXT[])
     RETURNS JSONB
     AS $$
 BEGIN
-    RETURN "value" - (ARRAY (SELECT jsonb_object_keys("value")) - "paths");
+    RETURN "value" - (ARRAY (SELECT jsonb_object_keys("value")) OPERATOR ( @extschema@.- ) "paths");
 END
 $$
 LANGUAGE plpgsql
@@ -148,7 +148,7 @@ CREATE TABLE "history"
 (
     "primary_key" JSONB
         CONSTRAINT "check_primary_key" CHECK ( ("dml" = 'INSERT' AND "primary_key" IS NULL) OR ("primary_key" IS NOT NULL AND "primary_key" != '{}' AND jsonb_typeof("primary_key") = 'object') ),
-    "dml"         DML       NOT NULL,
+    "dml"         @extschema@.DML       NOT NULL,
     "data"        JSONB
         CONSTRAINT "check_data" CHECK ( ("dml" = 'DELETE' AND "data" IS NULL) OR ("data" IS NOT NULL AND "data" != '{}' AND jsonb_typeof("data") = 'object') ),
     "timestamp"   TIMESTAMP NOT NULL DEFAULT NOW()
@@ -172,7 +172,7 @@ DECLARE
 BEGIN
     -- https://postgresql.org/docs/current/catalog-pg-class.html
     IF NOT EXISTS(SELECT "relname" FROM pg_class c WHERE c."relnamespace" = "history_schema" AND c."relname" = "target_table_name") THEN
-        EXECUTE format('CREATE TABLE %1s() INHERITS ("history");
+        EXECUTE format('CREATE TABLE %1s() INHERITS (@extschema@."history");
                         CREATE RULE "%2s__update" AS ON UPDATE TO %3s DO INSTEAD NOTHING;
                         CREATE RULE "%4s__delete" AS ON DELETE TO %5s DO INSTEAD NOTHING;',
                        "target_table",
@@ -195,10 +195,10 @@ CREATE FUNCTION history_delete("target_table" REGCLASS, "relid" OID, "old_record
 AS
 $$
 DECLARE
-    "pk_columns"  CONSTANT TEXT[] NOT NULL = get_primary_key("relid");
-    "primary_key" CONSTANT JSONB NOT NULL  = "old_record" -> "pk_columns";
+    "pk_columns"  CONSTANT TEXT[] NOT NULL = @extschema@.get_primary_key("relid");
+    "primary_key" CONSTANT JSONB NOT NULL  = "old_record" OPERATOR ( @extschema@.-> ) "pk_columns";
 BEGIN
-    RETURN insert_into_history("target_table", "primary_key", 'DELETE'::DML, NULL::JSONB);
+    RETURN @extschema@.insert_into_history("target_table", "primary_key", 'DELETE'::@extschema@.DML, NULL::JSONB);
 END
 $$
     LANGUAGE plpgsql
@@ -213,13 +213,13 @@ CREATE FUNCTION history_update("target_table" REGCLASS, "relid" OID, "old_record
 AS
 $$
 DECLARE
-    "pk_columns"             CONSTANT TEXT[] NOT NULL = get_primary_key("relid");
-    "primary_key"            CONSTANT JSONB NOT NULL  = "old_record" -> "pk_columns";
-    "chanced_record"         CONSTANT JSONB           = "new_record" - "old_record";
-    "history_chanced_record" CONSTANT JSONB           = "chanced_record" -/ "hidden_columns";
+    "pk_columns"             CONSTANT TEXT[] NOT NULL = @extschema@.get_primary_key("relid");
+    "primary_key"            CONSTANT JSONB NOT NULL  = "old_record" OPERATOR ( @extschema@.-> ) "pk_columns";
+    "chanced_record"         CONSTANT JSONB           = "new_record" OPERATOR ( @extschema@.- ) "old_record";
+    "history_chanced_record" CONSTANT JSONB           = "chanced_record" OPERATOR ( @extschema@.-/ ) "hidden_columns";
 BEGIN
     IF "history_chanced_record" IS NOT NULL AND "history_chanced_record" != '{}' THEN
-        RETURN insert_into_history("target_table", "primary_key", 'UPDATE'::DML, "history_chanced_record");
+        RETURN @extschema@.insert_into_history("target_table", "primary_key", 'UPDATE'::@extschema@.DML, "history_chanced_record");
     END IF;
 
     RETURN NULL;
@@ -231,7 +231,7 @@ $$
 /*
 =================== INSERT_INTO_HISTORY =================== 
 */
-CREATE FUNCTION insert_into_history("target_table" REGCLASS, "primary_key" JSONB, "dml" DML, "data" JSONB, "timestamp" TIMESTAMP = localtimestamp)
+CREATE FUNCTION insert_into_history("target_table" REGCLASS, "primary_key" JSONB, "dml" @extschema@.DML, "data" JSONB, "timestamp" TIMESTAMP = localtimestamp)
     RETURNS JSONB
 AS
 $$
@@ -258,18 +258,18 @@ CREATE FUNCTION trigger_history()
 AS
 $$
 DECLARE
-    "target_table"    CONSTANT REGCLASS NOT NULL = create_history_table(TG_ARGV[0]::REGNAMESPACE, TG_TABLE_SCHEMA, TG_TABLE_NAME);
+    "target_table"    CONSTANT REGCLASS NOT NULL = @extschema@.create_history_table(TG_ARGV[0]::REGNAMESPACE, TG_TABLE_SCHEMA, TG_TABLE_NAME);
     "hidden_columns"  CONSTANT TEXT[]            = TG_ARGV[1];
     "unsaved_columns" CONSTANT TEXT[]            = TG_ARGV[2];
 BEGIN
     IF TG_OP = 'INSERT' THEN
-        PERFORM insert_into_history("target_table", NULL::JSONB, 'INSERT'::DML, (to_jsonb(NEW) - "unsaved_columns") -/ "hidden_columns");
+        PERFORM @extschema@.insert_into_history("target_table", NULL::JSONB, 'INSERT'::@extschema@.DML, (to_jsonb(NEW) - "unsaved_columns") OPERATOR ( @extschema@.-/ ) "hidden_columns");
         RETURN NEW;
     ELSIF TG_OP = 'UPDATE' THEN
-        PERFORM history_update("target_table", TG_RELID, to_jsonb(OLD) - "unsaved_columns", to_jsonb(NEW) - "unsaved_columns", "hidden_columns");
+        PERFORM @extschema@.history_update("target_table", TG_RELID, to_jsonb(OLD) - "unsaved_columns", to_jsonb(NEW) - "unsaved_columns", "hidden_columns");
         RETURN NEW;
     ELSIF TG_OP = 'DELETE' THEN
-        PERFORM history_delete("target_table", TG_RELID, to_jsonb(OLD));
+        PERFORM @extschema@.history_delete("target_table", TG_RELID, to_jsonb(OLD));
         RETURN OLD;
     END IF;
 END
