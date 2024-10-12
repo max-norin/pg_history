@@ -1,4 +1,4 @@
-CREATE FUNCTION jsonb_set_null_fields ("value" JSONB, "paths" TEXT[])
+CREATE FUNCTION public.jsonb_set_null_fields ("value" JSONB, "paths" TEXT[])
     RETURNS JSONB
     AS $$
 DECLARE
@@ -16,10 +16,10 @@ $$
 LANGUAGE plpgsql
 IMMUTABLE;
 
-COMMENT ON FUNCTION jsonb_set_null_fields (JSONB, TEXT[]) IS 'set json fields to null';
+COMMENT ON FUNCTION public.jsonb_set_null_fields (JSONB, TEXT[]) IS 'set json fields to null';
 
-CREATE OPERATOR -/ (
-    LEFTARG = JSONB, RIGHTARG = TEXT[], FUNCTION = jsonb_set_null_fields
+CREATE OPERATOR public.-/ (
+    LEFTARG = JSONB, RIGHTARG = TEXT[], FUNCTION = public.jsonb_set_null_fields
 );
 
-COMMENT ON OPERATOR -/ (JSONB, TEXT[]) IS 'set json fields to null';
+COMMENT ON OPERATOR public.-/ (JSONB, TEXT[]) IS 'set json fields to null';

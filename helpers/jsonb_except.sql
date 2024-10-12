@@ -1,4 +1,4 @@
-CREATE FUNCTION jsonb_except ("a" JSONB, "b" JSONB)
+CREATE FUNCTION public.jsonb_except ("a" JSONB, "b" JSONB)
     RETURNS JSONB
     AS $$
 BEGIN
@@ -16,11 +16,11 @@ $$
 LANGUAGE plpgsql
 IMMUTABLE;
 
-COMMENT ON FUNCTION jsonb_except (JSONB, JSONB) IS '$1 EXCEPT $2';
+COMMENT ON FUNCTION public.jsonb_except (JSONB, JSONB) IS '$1 EXCEPT $2';
 
-CREATE OPERATOR - (
-    LEFTARG = JSONB, RIGHTARG = JSONB, FUNCTION = jsonb_except
+CREATE OPERATOR public.- (
+    LEFTARG = JSONB, RIGHTARG = JSONB, FUNCTION = public.jsonb_except
 );
 
-COMMENT ON OPERATOR - (JSONB, JSONB) IS '$1 EXCEPT $2';
+COMMENT ON OPERATOR public.- (JSONB, JSONB) IS '$1 EXCEPT $2';
 

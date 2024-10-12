@@ -1,4 +1,4 @@
-CREATE FUNCTION insert_into_history("target_table" REGCLASS, "primary_key" JSONB, "dml" @extschema@.DML, "data" JSONB, "timestamp" TIMESTAMP = localtimestamp)
+CREATE FUNCTION public.insert_into_history("target_table" REGCLASS, "primary_key" JSONB, "dml" public.DML, "data" JSONB, "timestamp" TIMESTAMP = localtimestamp)
     RETURNS JSONB
 AS
 $$

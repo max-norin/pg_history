@@ -1,4 +1,4 @@
-CREATE FUNCTION create_history_table("history_schema" REGNAMESPACE, "table_schema" TEXT, "table_name" TEXT)
+CREATE FUNCTION public.create_history_table("history_schema" REGNAMESPACE, "table_schema" TEXT, "table_name" TEXT)
     RETURNS REGCLASS
 AS
 $$
@@ -8,7 +8,7 @@ DECLARE
 BEGIN
     -- https://postgresql.org/docs/current/catalog-pg-class.html
     IF NOT EXISTS(SELECT "relname" FROM pg_class c WHERE c."relnamespace" = "history_schema" AND c."relname" = "target_table_name") THEN
-        EXECUTE format('CREATE TABLE %1s() INHERITS (@extschema@."history");
+        EXECUTE format('CREATE TABLE %1s() INHERITS (public."history");
                         CREATE RULE "%2s__update" AS ON UPDATE TO %3s DO INSTEAD NOTHING;
                         CREATE RULE "%4s__delete" AS ON DELETE TO %5s DO INSTEAD NOTHING;',
                        "target_table",

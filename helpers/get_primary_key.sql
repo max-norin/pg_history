@@ -1,4 +1,4 @@
-CREATE FUNCTION get_primary_key ("relid" OID)
+CREATE FUNCTION public.get_primary_key ("relid" OID)
     RETURNS TEXT[]
     AS $$
 BEGIN
@@ -17,5 +17,5 @@ LANGUAGE plpgsql
 STABLE
 RETURNS NULL ON NULL INPUT;
 
-COMMENT ON FUNCTION get_primary_key (OID) IS 'get table primary key columns';
+COMMENT ON FUNCTION public.get_primary_key (OID) IS 'get table primary key columns';
 
