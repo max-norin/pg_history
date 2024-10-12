@@ -9,8 +9,6 @@ CREATE TRIGGER history
     AFTER INSERT OR UPDATE OR DELETE
     ON posts
     FOR EACH ROW
-EXECUTE PROCEDURE trigger_history('history');
+EXECUTE PROCEDURE trigger_history();
 
 
-SELECT *
-FROM history."public.posts__2022_08";

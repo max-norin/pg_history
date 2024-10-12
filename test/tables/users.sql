@@ -9,13 +9,13 @@ CREATE TRIGGER history
     AFTER INSERT OR UPDATE OR DELETE
     ON users
     FOR EACH ROW
-EXECUTE PROCEDURE trigger_history('history', '{ id, nickname, password }', '{ password }');
+EXECUTE PROCEDURE trigger_history('{ id, nickname, password }', '{ password }');
 
 CREATE TRIGGER history
     AFTER INSERT OR UPDATE OR DELETE
     ON users
     FOR EACH ROW
-EXECUTE PROCEDURE trigger_history('history');
+EXECUTE PROCEDURE trigger_history();
 
 
 
