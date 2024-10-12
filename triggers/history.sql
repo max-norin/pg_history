@@ -14,6 +14,7 @@ BEGIN
     IF TG_OP = 'INSERT' THEN
         "primary_key" = to_jsonb(NEW) OPERATOR ( public.-> ) "pk_columns";
         "data" = public.get_history_data(to_jsonb(NEW), "unsaved_columns", "hidden_columns");
+        --"data" = to_jsonb(NEW);
     ELSIF TG_OP = 'UPDATE' THEN
         "primary_key" = to_jsonb(OLD) OPERATOR ( public.-> ) "pk_columns";
         "data"  = public.get_history_data(to_jsonb(NEW) OPERATOR ( public.- ) to_jsonb(OLD), "unsaved_columns", "hidden_columns");
@@ -23,10 +24,9 @@ BEGIN
         -- TODO вызвать ошибку
     END IF;
 
-    EXECUTE format('INSERT INTO %1s ("primary_key", "dml", "data") VALUES (%2L,%3L,%4L) RETURNING to_json(%1s.*);',
+    EXECUTE format('INSERT INTO %1s ("primary_key", "dml", "data") VALUES (%2L,%3L,%4L);',
                    "target_table",
-                   "primary_key", "dml", "data",
-                   "target_table"
+                   "primary_key", "dml", "data"
         );
     RETURN NEW;
 END
