@@ -15,7 +15,7 @@ AS $$
 BEGIN
     RETURN (
         -- %s - вставляется как простая строка
-        SELECT quote_ident(format('%1s.%2s', n.nspname, c.relname || to_char(CURRENT_DATE, '__yyyy_mm')))
+        SELECT format('%1s.%2s', n.nspname, c.relname || to_char(CURRENT_DATE, '__yyyy_mm'))
         FROM pg_class c JOIN pg_namespace n on c.relnamespace = n.oid
         WHERE c.oid = "relid");
 END
