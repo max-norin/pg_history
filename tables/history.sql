@@ -5,7 +5,7 @@ CREATE TABLE public."history"
     "dml"         public.DML       NOT NULL,
     "data"        JSONB
         CONSTRAINT "check_data" CHECK ( ("dml" = 'DELETE' AND "data" IS NULL) OR ("data" IS NOT NULL AND "data" != '{}' AND jsonb_typeof("data") = 'object') ),
-    "timestamp"   TIMESTAMP NOT NULL DEFAULT NOW()
+    "timestamp"   TIMESTAMP NOT NULL DEFAULT localtimestamp
 );
 
 COMMENT ON TABLE "history" IS 'history table parent';
