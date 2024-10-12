@@ -3,7 +3,7 @@ CREATE FUNCTION public.trigger_history()
 AS
 $$
 DECLARE
-    "target_table"    CONSTANT REGCLASS NOT NULL = public.create_history_table(TG_ARGV[0]::REGNAMESPACE, TG_TABLE_SCHEMA, TG_TABLE_NAME);
+    "target_table"    CONSTANT REGCLASS NOT NULL = public.create_history_table(TG_RELID);
     "hidden_columns"  CONSTANT TEXT[]            = TG_ARGV[1];
     "unsaved_columns" CONSTANT TEXT[]            = TG_ARGV[2];
 BEGIN
