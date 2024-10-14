@@ -4,12 +4,11 @@ CREATE TABLE public."history"
         CONSTRAINT "check_primary_key" CHECK ( ("dml" = 'INSERT' AND "primary_key" IS NULL) OR ("primary_key" IS NOT NULL AND "primary_key" != '{}' AND jsonb_typeof("primary_key") = 'object') ),
     "dml"         public.DML       NOT NULL,
     "data"        JSONB
-        -- TODO проблема в check_data
         CONSTRAINT "check_data" CHECK ( ("dml" = 'DELETE' AND "data" IS NULL) OR ("data" IS NOT NULL AND "data" != '{}' AND jsonb_typeof("data") = 'object') ),
     "timestamp"   TIMESTAMP NOT NULL DEFAULT localtimestamp
 );
 
-COMMENT ON TABLE "history" IS 'history table parent';
+COMMENT ON TABLE public."history" IS 'history table parent';
 
 CREATE RULE "history__insert" AS ON INSERT TO public."history"
     DO INSTEAD
