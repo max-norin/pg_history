@@ -1,10 +1,16 @@
-CREATE FUNCTION public.get_history_data("obj" JSONB, "drop_properties" TEXT[], "hidden_properties" TEXT[])
+CREATE FUNCTION public.get_history_data ("relid" OID, "option" public.DML, "change_data" JSONB, "args" VARIADIC TEXT[])
     RETURNS JSONB
-AS
-$$
+    AS $$
+DECLARE
+    "hidden_columns"  CONSTANT TEXT[] = "args"[0];
+    "unsaved_columns" CONSTANT TEXT[] = "args"[1];
 BEGIN
-    RETURN  ("obj" - "drop_properties") OPERATOR ( public.-/ ) "hidden_properties";
+    IF "option" = 'DELETE' THEN
+        RETURN NULL;
+    END IF;
+
+    RETURN ("change_data" - "unsaved_columns") OPERATOR ( public.-/ ) "hidden_columns";
 END
 $$
-    LANGUAGE plpgsql
-    IMMUTABLE;
+LANGUAGE plpgsql
+IMMUTABLE; -- функция не может модифицировать базу данных и всегда возвращает один и тот же результат

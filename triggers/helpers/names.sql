@@ -1,4 +1,4 @@
-CREATE FUNCTION public.get_history_schema_name ("relid" OID)
+CREATE FUNCTION public.get_history_schema_name ("relid" OID, "option" public.DML, "change_data" JSONB, "args" VARIADIC TEXT[])
     RETURNS TEXT
     AS $$
 BEGIN
@@ -6,12 +6,11 @@ BEGIN
 END
 $$
 LANGUAGE plpgsql
-STABLE -- функция не может модифицировать базу данных и всегда возвращает один и тот же результат при определённых значениях аргументов внутри одного SQL запроса
-RETURNS NULL ON NULL INPUT; -- функция всегда возвращает NULL, получив NULL в одном из аргументов
+IMMUTABLE ; -- функция не может модифицировать базу данных и всегда возвращает один и тот же результат
 
-CREATE FUNCTION public.get_history_table_name ("relid" OID)
+CREATE FUNCTION public.get_history_table_name ("relid" OID, "option" public.DML, "change_data" JSONB, "args" VARIADIC TEXT[])
     RETURNS TEXT
-AS $$
+    AS $$
 BEGIN
     RETURN (
         -- %s - вставляется как простая строка
@@ -20,6 +19,5 @@ BEGIN
         WHERE c.oid = "relid");
 END
 $$
-    LANGUAGE plpgsql
-    STABLE -- функция не может модифицировать базу данных и всегда возвращает один и тот же результат при определённых значениях аргументов внутри одного SQL запроса
-    RETURNS NULL ON NULL INPUT; -- функция всегда возвращает NULL, получив NULL в одном из аргументов
+LANGUAGE plpgsql
+IMMUTABLE; -- функция не может модифицировать базу данных и всегда возвращает один и тот же результат
