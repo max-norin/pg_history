@@ -1,15 +1,16 @@
 CREATE TABLE "users"
 (
-    "id"       SERIAL PRIMARY KEY,
-    "nickname" VARCHAR(255) NOT NULL UNIQUE,
-    "password" VARCHAR(255) NOT NULL
+    "id"         SERIAL PRIMARY KEY,
+    "nickname"   VARCHAR(255) NOT NULL UNIQUE,
+    "password"   VARCHAR(255) NOT NULL,
+    "created_at" TIMESTAMP    NOT NULL DEFAULT NOW()
 );
 
 CREATE TRIGGER history
     AFTER INSERT OR UPDATE OR DELETE
     ON users
     FOR EACH ROW
-EXECUTE PROCEDURE trigger_history('{ id, nickname, password }', '{ password }');
+EXECUTE PROCEDURE trigger_history('{ password }', '{ created_at }');
 
 CREATE TRIGGER history
     AFTER INSERT OR UPDATE OR DELETE
@@ -17,19 +18,7 @@ CREATE TRIGGER history
     FOR EACH ROW
 EXECUTE PROCEDURE trigger_history();
 
-
-
-INSERT INTO "users"("nickname")
-VALUES ('test8');
-
-UPDATE "users"
-SET ("id", "nickname") = ROW (0, '7test')
-WHERE "nickname" = '7test';
-
-DELETE
-FROM "users"
-WHERE "nickname" = 'test';
-
-
-SELECT *
-FROM history."public.users__2022_08";
+INSERT INTO users("nickname","password") VALUES ('max', '123');
+UPDATE users SET password = '321' WHERE id = 1;
+UPDATE users SET password = '312' WHERE id = 1;
+DELETE FROM users WHERE id = 1;

@@ -1,4 +1,4 @@
-CREATE FUNCTION public.get_history_schema_name ("relid" OID, "option" public.DML, "change_data" JSONB, "args" VARIADIC TEXT[])
+CREATE FUNCTION public.get_history_schema_name ("relid" OID, "option" public.DML, "changed_data" JSONB, "args" VARIADIC TEXT[])
     RETURNS TEXT
     AS $$
 BEGIN
@@ -8,7 +8,7 @@ $$
 LANGUAGE plpgsql
 IMMUTABLE ; -- функция не может модифицировать базу данных и всегда возвращает один и тот же результат
 
-CREATE FUNCTION public.get_history_table_name ("relid" OID, "option" public.DML, "change_data" JSONB, "args" VARIADIC TEXT[])
+CREATE FUNCTION public.get_history_table_name ("relid" OID, "option" public.DML, "changed_data" JSONB, "args" VARIADIC TEXT[])
     RETURNS TEXT
     AS $$
 BEGIN

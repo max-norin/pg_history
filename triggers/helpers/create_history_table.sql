@@ -1,9 +1,9 @@
-CREATE FUNCTION public.create_history_table("relid" OID, "option" public.DML, "change_data" JSONB, "args" VARIADIC TEXT[])
+CREATE FUNCTION public.create_history_table("relid" OID, "option" public.DML, "changed_data" JSONB, "args" VARIADIC TEXT[])
     RETURNS REGCLASS
     AS $$
 DECLARE
-    "history_schema"         CONSTANT REGNAMESPACE NOT NULL = public.get_history_schema_name("relid","option", "change_data", VARIADIC "args")::REGNAMESPACE;
-    "target_table_name"      CONSTANT TEXT NOT NULL         = public.get_history_table_name("relid","option", "change_data", VARIADIC "args");
+    "history_schema"         CONSTANT REGNAMESPACE NOT NULL = public.get_history_schema_name("relid","option", "changed_data", VARIADIC "args")::REGNAMESPACE;
+    "target_table_name"      CONSTANT TEXT NOT NULL         = public.get_history_table_name("relid","option", "changed_data", VARIADIC "args");
     -- %I - вставляется как идентификатора SQL, экранируется при необходимости
     "target_table_full_name" CONSTANT TEXT NOT NULL         = format('%I.%I', "history_schema", "target_table_name");
 BEGIN
