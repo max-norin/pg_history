@@ -5,9 +5,9 @@ DECLARE
     "dml"          CONSTANT public.DML NOT NULL = TG_OP::public.DML;
     "new_data"     CONSTANT JSONB               = to_jsonb(NEW);
     "old_data"     CONSTANT JSONB               = to_jsonb(OLD);
-    "changed_data"  CONSTANT JSONB               = "new_data" OPERATOR ( public.- ) "old_data";
+    "changed_data" CONSTANT JSONB               = "new_data" OPERATOR ( public.- ) "old_data";
     "target_table" CONSTANT REGCLASS NOT NULL   = public.create_history_table(TG_RELID, "dml", "changed_data", VARIADIC TG_ARGV);
-    "pk_columns"   CONSTANT TEXT[]   NOT NULL   = public.get_primary_key(TG_RELID);
+    "pk_columns"   CONSTANT TEXT[]   NOT NULL   = public.get_primary_key_columns(TG_RELID);
     "primary_key"  CONSTANT JSONB    NOT NULL   = COALESCE("old_data", "new_data") OPERATOR ( public.-> ) "pk_columns";
     "data"         CONSTANT JSONB               = public.get_history_data(TG_RELID, "dml", "changed_data", VARIADIC TG_ARGV);
 BEGIN

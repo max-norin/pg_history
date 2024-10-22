@@ -31,9 +31,9 @@ CREATE OPERATOR @extschema@.- (
 COMMENT ON OPERATOR @extschema@.- (ANYARRAY, ANYARRAY) IS '$1 EXCEPT $2';
 
 /*
-=================== GET_PRIMARY_KEY ===================
+=================== GET_PRIMARY_KEY_COLUMNS ===================
 */
-CREATE FUNCTION @extschema@.get_primary_key ("relid" OID)
+CREATE FUNCTION @extschema@.get_primary_key_columns ("relid" OID)
     RETURNS TEXT[]
     AS $$
 BEGIN
@@ -52,7 +52,7 @@ LANGUAGE plpgsql
 STABLE
 RETURNS NULL ON NULL INPUT;
 
-COMMENT ON FUNCTION @extschema@.get_primary_key (OID) IS 'get table primary key columns';
+COMMENT ON FUNCTION @extschema@.get_primary_key_columns (OID) IS 'get table primary key columns';
 
 /*
 =================== JSONB_EXCEPT ===================
@@ -146,9 +146,8 @@ COMMENT ON TYPE @extschema@.DML IS 'Data Manipulation Language';
 */
 CREATE TABLE @extschema@."history"
 (
-    "primary_key" JSONB
-        CONSTRAINT "check_primary_key" CHECK ( ("dml" = 'INSERT' AND "primary_key" IS NULL) OR ("primary_key" IS NOT NULL AND "primary_key" != '{}' AND jsonb_typeof("primary_key") = 'object') ),
-    "dml"         @extschema@.DML       NOT NULL,
+    "primary_key" JSONB NOT NULL,
+    "dml"         public.DML NOT NULL,
     "data"        JSONB
         CONSTRAINT "check_data" CHECK ( ("dml" = 'DELETE' AND "data" IS NULL) OR ("data" IS NOT NULL AND "data" != '{}' AND jsonb_typeof("data") = 'object') ),
     "timestamp"   TIMESTAMP NOT NULL DEFAULT localtimestamp
@@ -247,9 +246,9 @@ DECLARE
     "dml"          CONSTANT @extschema@.DML NOT NULL = TG_OP::@extschema@.DML;
     "new_data"     CONSTANT JSONB               = to_jsonb(NEW);
     "old_data"     CONSTANT JSONB               = to_jsonb(OLD);
-    "changed_data"  CONSTANT JSONB               = "new_data" OPERATOR ( @extschema@.- ) "old_data";
+    "changed_data" CONSTANT JSONB               = "new_data" OPERATOR ( @extschema@.- ) "old_data";
     "target_table" CONSTANT REGCLASS NOT NULL   = @extschema@.create_history_table(TG_RELID, "dml", "changed_data", VARIADIC TG_ARGV);
-    "pk_columns"   CONSTANT TEXT[]   NOT NULL   = @extschema@.get_primary_key(TG_RELID);
+    "pk_columns"   CONSTANT TEXT[]   NOT NULL   = @extschema@.get_primary_key_columns(TG_RELID);
     "primary_key"  CONSTANT JSONB    NOT NULL   = COALESCE("old_data", "new_data") OPERATOR ( @extschema@.-> ) "pk_columns";
     "data"         CONSTANT JSONB               = @extschema@.get_history_data(TG_RELID, "dml", "changed_data", VARIADIC TG_ARGV);
 BEGIN
