@@ -147,7 +147,7 @@ COMMENT ON TYPE @extschema@.DML IS 'Data Manipulation Language';
 CREATE TABLE @extschema@."history"
 (
     "primary_key" JSONB NOT NULL,
-    "dml"         public.DML NOT NULL,
+    "dml"         @extschema@.DML NOT NULL,
     "data"        JSONB
         CONSTRAINT "check_data" CHECK ( ("dml" = 'DELETE' AND "data" IS NULL) OR ("data" IS NOT NULL AND "data" != '{}' AND jsonb_typeof("data") = 'object') ),
     "timestamp"   TIMESTAMP NOT NULL DEFAULT localtimestamp
