@@ -34,6 +34,14 @@ CREATE EXTENSION "pg_history"
 
 [Learn more about an extension and control file](https://postgrespro.ru/docs/postgresql/current/extend-extensions)
 
+## Workaround
+
+If you can't add the extension to PostgreSQL, then there is another option.
+Copy the contents of files with the `.sql` extension from [dist](./dist) to a text editor.
+Replace the expression `@extschema@` with a schema
+to which the necessary functions will be added, for example `abstract`.
+Copy it to the PostgreSQL console and run it.
+
 # Example table `history."public.users__2022_08"`
 
 | \# | primary_key | dml    | data                                           | timestamp                  |
