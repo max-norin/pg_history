@@ -44,12 +44,13 @@ Copy it to the PostgreSQL console and run it.
 
 # Example table `history."public.users__2022_08"`
 
-| \# | primary_key | dml    | data                                           | timestamp                  |
-|----|-------------|--------|------------------------------------------------|----------------------------|
-| 1  | {"id": 4}   | INSERT | {"id": 4, "nickname": "Max", "password": null} | 2022-08-06 12:18:02.613552 |
-| 2  | {"id": 4}   | UPDATE | {"nickname": "Max N"}                          | 2022-08-06 12:18:13.486149 |
-| 3  | {"id": 4}   | UPDATE | {"nickname": "Max NM", "password": null}       | 2022-08-06 12:18:20.433618 |
-| 4  | {"id": 4}   | DELETE |                                                | 2022-08-06 12:18:22.118845 |
+| \# | primary_key | dml    | has_primary_key_change | data                                           | timestamp                  |
+|----|-------------|--------|------------------------|------------------------------------------------|----------------------------|
+| 1  | {"id": 4}   | INSERT | false                  | {"id": 4, "nickname": "Max", "password": null} | 2022-08-06 12:18:02.613552 |
+| 2  | {"id": 4}   | UPDATE | false                  | {"nickname": "Max N"}                          | 2022-08-06 12:18:13.486149                      |
+| 3  | {"id": 4}   | UPDATE | false                  | {"nickname": "Max NM", "password": null}       | 2022-08-06 12:18:20.433618                     |
+| 4  | {"id": 4}   | UPDATE | true                   | {"id": 1}                                      | 2022-08-06 12:18:20.433618                     |
+| 5  | {"id": 1}   | DELETE | false                  |                                                | 2022-08-06 12:18:22.118845                     |
 
 # Usage
 
