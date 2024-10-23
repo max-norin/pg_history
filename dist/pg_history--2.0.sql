@@ -90,12 +90,11 @@ CREATE FUNCTION @extschema@.jsonb_object_fields ("value" JSONB, "paths" TEXT[])
     RETURNS JSONB
     AS $$
 BEGIN
-    RETURN "value" - (ARRAY (SELECT jsonb_object_keys("value")) OPERATOR ( @extschema@.- ) "paths");
+    RETURN "value" - (@extschema@.jsonb_object_keys_to_array("value") OPERATOR ( @extschema@.- ) "paths");
 END
 $$
 LANGUAGE plpgsql
-IMMUTABLE
-RETURNS NULL ON NULL INPUT;
+IMMUTABLE;
 
 COMMENT ON FUNCTION @extschema@.jsonb_object_fields (JSONB, TEXT[]) IS 'get json object fields';
 
@@ -104,6 +103,21 @@ CREATE OPERATOR @extschema@.-> (
 );
 
 COMMENT ON OPERATOR @extschema@.-> (JSONB, TEXT[]) IS 'get json object fields';
+
+/*
+=================== JSONB_SET_NULL_FIELDS ===================
+*/
+
+CREATE FUNCTION @extschema@.jsonb_object_keys_to_array ("value" JSONB)
+    RETURNS TEXT[]
+    AS $$
+BEGIN
+    RETURN ARRAY (SELECT jsonb_object_keys("value"));
+END
+$$
+LANGUAGE plpgsql
+IMMUTABLE
+RETURNS NULL ON NULL INPUT;
 
 /*
 =================== JSONB_SET_NULL_FIELDS ===================
@@ -146,11 +160,13 @@ COMMENT ON TYPE @extschema@.DML IS 'Data Manipulation Language';
 */
 CREATE TABLE @extschema@."history"
 (
-    "primary_key" JSONB NOT NULL,
-    "dml"         @extschema@.DML NOT NULL,
-    "data"        JSONB
+    "primary_key"            JSONB NOT NULL,
+    "dml"                    @extschema@.DML NOT NULL,
+    "has_primary_key_change" BOOLEAN NOT NULL
+        GENERATED ALWAYS AS ( NOT ("primary_key" @> COALESCE("data" OPERATOR ( @extschema@.-> ) @extschema@.jsonb_object_keys_to_array("primary_key"), '{}'::JSONB)) ) STORED,
+    "data"                   JSONB
         CONSTRAINT "check_data" CHECK ( ("dml" = 'DELETE' AND "data" IS NULL) OR ("data" IS NOT NULL AND "data" != '{}' AND jsonb_typeof("data") = 'object') ),
-    "timestamp"   TIMESTAMP NOT NULL DEFAULT localtimestamp
+    "timestamp"              TIMESTAMP NOT NULL DEFAULT localtimestamp
 );
 
 COMMENT ON TABLE @extschema@."history" IS 'history table parent';
